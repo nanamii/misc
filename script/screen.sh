@@ -1,3 +1,3 @@
 #!/bin/bash
 
-disper -e
+disper --cycle-stages="-e : -S" --cycle
