@@ -7,8 +7,9 @@ toc: yes
 ---
 
 
+\newpage
 
-# Allgmeines
+# Allgemeines
 
 Als Leistungsnachweis für das Fach Softwaresysteme -
 Parallele Softwareentwicklung, werden aus fünf möglichen Aufgaben die folgenden drei Aufgaben bearbeitet:
@@ -22,7 +23,6 @@ Tests wurden auf folgendem System ausgeführt:
  - CPU: Intel Core i7, 4x2,67GHz
  - OS: Fedora 23
 
-\newpage
 
 # 1. OpenMP
 
@@ -147,6 +147,23 @@ parallel auszuführen. Wie in der Ausgabe zu sehen ist, hat bei vier verfügbare
 
 
 **Parallele Regionen:** Parallele Ausführung eines beliebigen Code-Abschnitts.
+  Die Direktive sieht in *C* wie folgt aus:
+
+```C
+    #pragma omp parallel [clause [clause ...]] 
+    {
+        ...
+    }
+```
+Für *clause* kann eine der folgenden Optionen gewählt werden:
+    `private(list)`,
+    `shared(list)`,
+    `default(private|shared|none)`,
+    `firstprivate(list)`,
+    `reduction(operator:list)`,
+    `if(expr)`
+
+
 
 ```C
     #pragma omp parallel
@@ -155,16 +172,36 @@ parallel auszuführen. Wie in der Ausgabe zu sehen ist, hat bei vier verfügbare
     }
 ```
 
+Ausgabe:
 
-**Work-Sharing Konstrukte**
+```bash
+    >> Hello World!
+    >> Hello World!
+    >> Hello World!
+    >> Hello World!
+```
+
+**Work-Sharing-Konstrukte:** Innerhalb einer parallelen Region kann die Arbeit
+auf Threads verteilt werden
 
 **Tasks**
+
+
+# 1.3 Laplace DGS
 
 
 
 \newpage
 
 # 2. pthread 
+
+
+# 2.1 Haupteigenschaften
+
+
+# 2.2 Arten der Parallelverarbeitung
+
+# 2.3 Laplace DGS
 
 **1.) Welche Eigenschaften sind für ein Echtzeit-Betriebssystem wünschenswert?**
 
