@@ -315,12 +315,12 @@ Auf dem verfügbaren Testsystem läuft NPTL in der Version 2.22.
 
 # 2.1 Haupteigenschaften
 
-* Erzeugen eines neuen Threads:
+* **Erzeugen eines neuen Threads:**
 ```C
 	include <pthread.h>
 	int pthread_create( pthread_t *thread,
                         const pthread_attr_t *attribute,
-                        void *(*funktion)(void *), void *argumente );
+                        void *(*funktion)(void *), void *argument );
 ```    
     Jeder Thread kann eindeutig identifiziert werden. Diese
     Identifikationsnummer vom Datentyp `pthread_t` wird in der Adresse unter
@@ -328,24 +328,59 @@ Auf dem verfügbaren Testsystem läuft NPTL in der Version 2.22.
     `NULL` belegt, werden die Standard-Attribute gesetzt. Mit `void
     *(*funktion)(void*)` wird eine *Thread-Funktion* bereitgestellt. Mit dem
     letzten Parameter `void *argument` wird der *Thread-Funktion* der Wert
-    übergeben, mit dem sie aufgerufen werden soll. 
+    übergeben, mit dem sie aufgerufen werden soll.
 
-# 2.2 Arten der Parallelverarbeitung
+* **Beenden eines Threads:**
+    Ein Thread kann, wie bei Funktionen unter *C* üblich, mit `return` oder mit
+    der Funktion `pthread_exit` beendet werden. Der Rückgabewert muss in beiden
+    Fällen vom Typ `void*` sein.
 
-# 2.3 Laplace DGS
+    Mit `pthread_cleanup_push()` und `pthread_cleanup_pop()` werden nach Beenden
+    eines Threads Ressourcen freigegeben.
 
-**1.) Welche Eigenschaften sind für ein Echtzeit-Betriebssystem wünschenswert?**
+* **Warten auf Threads:**
+   Die Funktion `pthread_join()` ermöglicht dem Haupt-Thread auf das Ende und
+   den Rückgabewert einzelner Threads zu warten.
+
+* **Mutex (Wechselseitiger Ausschluss):**   
+    Um zu vermeiden, dass Threads gleichzeitig auf gemeinsam genutzte Daten
+    zugreifen, verwendet pthread das *Mutex-Verfahren* (*mutual exclusion*) in einer
+    speziellen Form des *Edsger Dijkstra Semaphor*[^edsger].
+
+[^edsger]: Butenhof, David R. Programming with POSIX threads. Addison-Wesley
+Professional, S. 47, 1997.
+    
+
+# 2.2 Serielle vs. parallele/synchronisierte Version
+
+Da bereits in Kapitel 1 - OpenMP die numerische Lösung des Laplace'schen
+Differentialgleichungssystems betrachtet wurde, soll für pthread ein anderes
+Beispiel herangezogen werden. Basierend auf dem Code von Blaise Barney[^dot]
+zur Berechnung eines Skalarprodukts soll das Laufzeitverhalten der seriellen 
+Version[^dot2] mit dem der parallelen/synchronisierten Version verglichen werden.
+
+Im Code-Beispiel liegt die folgende Datenstruktur vor, auf die alle Threads
+gemeinsam zugreifen:
+
+```C
+    typedef struct 
+    {
+        double      *a;
+        double      *b;
+        double     sum; 
+        int     veclen; 
+    } DOTDATA;
+```
+
+Letztendlich geht es in diesem Beispiel eher darum, das Mutex-Konstrukt zu
+verstehen. Die Laufzeitunterschiede zwischen paralleler und synchroner Version
+sind eher gering.
 
 
-* **Multitasking:** Gleichzeitiges Ausführen mehrerer Prozesse. Die
-  Systemaufrufe sollen reentrant sein, d.h. sie können erneut aufgerufen werden.
-* **Echtzeit Scheduler/Dispatcher:** Ein höher priorisierter Task sollte
-  eingeschoben werden können. *Preemption* beendet dazu aktive Tasks und schiebt
-  den höher priorisierten Task ein, es bevorrechtigt sozusagen Tasks mit höherer
-  Priorität. Ebenfalls müssen Abhängigkeiten von anderen Tasks berücksichtigt
-  werden.
+
+[^dot]: https://computing.llnl.gov/tutorials/pthreads/samples/mpithreads_threads.c
+[^dot2]: https://computing.llnl.gov/tutorials/pthreads/samples/mpithreads_serial.c
 
 
-**3.) Was fehlt bei Standard-Linux zur Echtzeitfähigkeit? Was ist überflüssig?**
 
 # 3. Intel's Vtune Amplifier
