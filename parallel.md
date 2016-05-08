@@ -37,20 +37,23 @@ wurde vortan erweitert.
 
 OpenMP definiert sich durch folgende Haupteigenschaften:
 
-* **Parallelisierung geschieht auf der Ebene von Schleifen**
-* **Direktiven weisen Compiler an, Abarbeitung einer Schleife auf Threads bzw.
-  Prozessoren zu verteilen**
-
-* **Laufzeit-Funktionen (Runtime subroutines/functions):**
-    Bsp: omp_set_num_threads(n), legt die Anzahl der OpenMP Threads fest
-* **Umgebungsvariablen (Environment variables):**
-    Bsp: OMP_NUM_THREADS
+* **Parallelisierung** geschieht auf der Ebene von Schleifen (Haupteinsatzgebiet).
+  Weiterhin wird Parallelität durch *Parallele Regionen*,
+  *Worksharing-Konstrukte* und *Tasks* erreicht.
+* **Direktiven** weisen Compiler an, Abarbeitung einer Schleife auf Threads bzw.
+  Prozessoren zu verteilen.
 * **Fork/Join Modell:** 
     OpenMP Programme starten mit einem Thread (Master-Thread),
     Team aus parallelen Threads (Worker-Threads) wird erstellt, Anweisungen im
     Parallel-Block werden von allen Threads bearbeitet, am Ende synchronisieren
-    sich alle Threads und *joinen* in den Master-Thread 
-* **Shared und Private Variablen:**
+    sich alle Threads und *joinen* in den Master-Thread. 
+* **Laufzeit-Funktionen (Runtime subroutines/functions):** Werden hauptsächlich
+  verwendet, um Parameter der Laufzeitumgebung von OpenMP abzufragen oder zu
+  setzen.
+    Bsp: `omp_set_num_threads(n)`, legt die Anzahl der OpenMP Threads fest
+* **Umgebungsvariablen (Environment variables): **Setzen der Parameter der
+  Laufzeitumgebung zu Beginn der Programmausführung.
+    Bsp: `OMP_NUM_THREADS=2`
     
 
 Erste Tests wurden mit folgendem Code (basierend auf omp_hello.c von Blaise
@@ -64,6 +67,7 @@ Barney) ausgeführt:
     int main (int argc, char *argv[]) 
     {
     int nthreads, tid;
+    /* Anzahl der Threads explizit auf 3 gesetzt.
     omp_set_dynamic(0)
     omp_set_num_threads(3);
 
@@ -90,14 +94,17 @@ Barney) ausgeführt:
 Ausgabe:
 
 ```bash
-   >> Hello World from thread = 3
    >> Hello World from thread = 0
-   >> Number of threads = 4
-   >> Hello World from thread = 1
+   >> Number of threads = 3
    >> Hello World from thread = 2
+   >> Hello World from thread = 1
 ```
 
-Die Reihenfolge der Thread-Ausführung variiert.
+Das Code-Beispiel zeigt die parallele Ausführung der `print`-Anweisung. Innerhalb
+des Codes wird der aktuell ausführende Thread mit `omp_get_thread_num()`
+und die Anzahl der Threads mit `omp_get_num_threads()` abgefragt.
+Die Reihenfolge in der die Threads die `print`-Anweisung abarbeiten, variiert je
+Programmausführung.
 
 
 # 1.2 Arten der Parallelverarbeitung
@@ -142,7 +149,7 @@ Ausgabe:
     >> Thread 4: 25 Durchläufe
 ```
 
-Durch den Ausdruck #pragma omp for wird OpenMP angewiesen, die for-Schleife
+Durch den Ausdruck `#pragma omp for` wird OpenMP angewiesen, die for-Schleife
 parallel auszuführen. Wie in der Ausgabe zu sehen ist, hat bei vier verfügbaren Threads und insgesamt 100 Schleifen-Durchläufen jeder Thread 25 Durchläufe übernommen.
 
 
@@ -212,7 +219,7 @@ experimentiert[^DGS].
 [^DGS]: https://people.sc.fsu.edu/~jburkardt/c_src/heated_plate_openmp/heated_plate_openmp.c
 
 Der Source-Code nähert sich der Lösung der iterativen Temperaturausbreitung in
-einem zweidimensionalen Raum durch wiederholte Ausführung folgendes Codes:
+einem zweidimensionalen Raum durch wiederholte Ausführung folgenden Codes:
 
 ```C
     W[Central] = (1/4) * ( W[North] + W[South] + W[East] + W[West] )
@@ -263,17 +270,26 @@ C/OpenMP version
      16955  0.001000
 
   Error tolerance achieved.
-  Wallclock time = 82.692189
+  Wallclock time = 59.955202
 
 HEATED_PLATE_OPENMP:
   Normal end of execution
 ```
 
+Die **parallele Implementierung** hat bei einem Rechteck mit 500x500 Punkten
+**59.955202 Sekunden** gebraucht. Die Toleranzgrenze lag bei 0.001, dafür wurden
+16955 Iterationen benötigt. Zur Zeitmessung wurde die Funktion `omp_get_wtime()`
+der OpenMP-Laufzeitbibliothek verwendet.
 
+Die **serielle Version** hat bei sonst gleichen Parametern **81.080792
+Sekunden** benötigt. Zur Zeitmessung wurde die C-Bibliotheksfunktion `clock()`
+der `<time.h>` C-Bibliothek verwendet. 
 
 \newpage
 
-# 2. pthread 
+# 2. pthread
+
+
 
 
 # 2.1 Haupteigenschaften
