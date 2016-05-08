@@ -57,7 +57,7 @@ OpenMP definiert sich durch folgende Haupteigenschaften:
     
 
 Erste Tests wurden mit folgendem Code (basierend auf omp_hello.c von Blaise
-Barney) ausgeführt:
+Barney [^hello]) ausgeführt:
 
 ```C
     #include <omp.h>
@@ -107,6 +107,8 @@ Die Reihenfolge in der die Threads die `print`-Anweisung abarbeiten, variiert je
 Programmausführung.
 
 
+[^hello]: https://computing.llnl.gov/tutorials/openMP/samples/C/omp_hello.c
+
 # 1.2 Arten der Parallelverarbeitung
 
 **Parallelisierung von Schleifen**
@@ -152,6 +154,7 @@ Ausgabe:
 Durch den Ausdruck `#pragma omp for` wird OpenMP angewiesen, die for-Schleife
 parallel auszuführen. Wie in der Ausgabe zu sehen ist, hat bei vier verfügbaren Threads und insgesamt 100 Schleifen-Durchläufen jeder Thread 25 Durchläufe übernommen.
 
+\newpage
 
 **Parallele Regionen:** Parallele Ausführung eines beliebigen Code-Abschnitts.
   Die Direktive sieht in *C* wie folgt aus:
@@ -162,6 +165,7 @@ parallel auszuführen. Wie in der Ausgabe zu sehen ist, hat bei vier verfügbare
         ...
     }
 ```
+
 Für *clause* kann eine der folgenden Optionen gewählt werden:
     `private(list)`,
     `shared(list)`,
@@ -287,12 +291,30 @@ der `<time.h>` C-Bibliothek verwendet.
 
 \newpage
 
-# 2. pthread
+# 2. POSIX Threads (pthread)
+
+POSIX Threads, oder auch *pthreads* genannt, spezifizieren Schnittstellen
+(Funktionen, Header-Dateien) für die parallele Programmierung. POSIX steht für
+*Portable Operating System Interface* und ist eine von IEEE und der Open Group
+entwickelte API [^posix].
+
+Unter Linux gibt es zwei Implementierungen von pthreads, die von der GNU C
+Bibliothek unterstützt werden:
+
+    - LinuxThreads: Die originale pthreads-Implementierung. Wird seit glibc
+      Version 2.4 nicht mehr unterstützt.
+    - NPTL (Native POSIX Threads Library): Im Vergleich zu LinuxThreads erfüllt
+      es eher die Anforderungen von POSIX.1. Außerdem bietet es eine verbesserte
+      Performance bei einer großen Anzahl an Threads.
+
+Auf dem verfügbaren Testsystem läuft NPTL in der Version 2.22.
 
 
-
+[^posix]: http://www.opengroup.org/austin/papers/posix_faq.html
 
 # 2.1 Haupteigenschaften
+
+* Erzeugen eines pthreads
 
 
 # 2.2 Arten der Parallelverarbeitung
