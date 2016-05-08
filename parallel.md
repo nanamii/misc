@@ -43,6 +43,7 @@ OpenMP definiert sich durch folgende Haupteigenschaften:
 * **Direktiven** weisen Compiler an, Abarbeitung einer Schleife auf Threads bzw.
   Prozessoren zu verteilen.
 * **Fork/Join Modell:** 
+
     OpenMP Programme starten mit einem Thread (Master-Thread),
     Team aus parallelen Threads (Worker-Threads) wird erstellt, Anweisungen im
     Parallel-Block werden von allen Threads bearbeitet, am Ende synchronisieren
@@ -314,8 +315,20 @@ Auf dem verfügbaren Testsystem läuft NPTL in der Version 2.22.
 
 # 2.1 Haupteigenschaften
 
-* Erzeugen eines pthreads
-
+* Erzeugen eines neuen Threads:
+```C
+	include <pthread.h>
+	int pthread_create( pthread_t *thread,
+                        const pthread_attr_t *attribute,
+                        void *(*funktion)(void *), void *argumente );
+```    
+    Jeder Thread kann eindeutig identifiziert werden. Diese
+    Identifikationsnummer vom Datentyp `pthread_t` wird in der Adresse unter
+    `*thread` abgelegt. Wird der Parameter `const pthread_attr_t *attribute` mit
+    `NULL` belegt, werden die Standard-Attribute gesetzt. Mit `void
+    *(*funktion)(void*)` wird eine *Thread-Funktion* bereitgestellt. Mit dem
+    letzten Parameter `void *argument` wird der *Thread-Funktion* der Wert
+    übergeben, mit dem sie aufgerufen werden soll. 
 
 # 2.2 Arten der Parallelverarbeitung
 
