@@ -64,25 +64,25 @@ Barney) ausgeführt:
     int main (int argc, char *argv[]) 
     {
     int nthreads, tid;
+    omp_set_dynamic(0)
+    omp_set_num_threads(3);
 
-
-    /* Fork a team of threads giving them their own copies of variables */
+    /* Ein Team von Threads *forken* und eine Kopie von Variablen übergeben */
     #pragma omp parallel private(nthreads, tid)
       {
 
-        /* Obtain thread number */
-        omp_set_num_threads(8);
+        /* Thread-Nummer abfragen */
         tid = omp_get_thread_num();
         printf("Hello World from thread = %d\n", tid);
 
-        /* Only master thread does this */
+        /* Wird nur von Master-Thread ausgeführt, dieser ist standardmäßig 0 */
         if (tid == 0) 
             {
             nthreads = omp_get_num_threads();
             printf("Number of threads = %d\n", nthreads);
             }
 
-      }  /* All threads join master thread and disband */
+      }  /* Alle Threads *joinen* den Master-Thread*/
     }
 
 ```
@@ -182,12 +182,92 @@ Ausgabe:
 ```
 
 **Work-Sharing-Konstrukte:** Innerhalb einer parallelen Region kann die Arbeit
-auf Threads verteilt werden
+auf Threads verteilt werden.
 
-**Tasks**
++ Bei **manueller Aufteilung** der Arbeit muss der Zugriff auf die Aufgabenliste
+  synchronisiert werden, um zu vermeiden, dass eine Aufgabe mehrfach ausgeführt
+  wird.
++ Erfolgt die **Aufteilung der Arbeit nach Thread-Nummer**, kann die Anzahl der
+  Threads im Team bestimmt werden. Die Arbeit lässt sich in Blöcke zerlegen und
+  jedem Thread zuweisen.
++ **Work-Sharing-Konstrukte** ermöglichen eine automatische Verteilung der Arbeit.
+    - Unterschiedliche Code-Abschnitte, die nicht voneinander abhängen und
+      parallel zueinander abgearbeitet werden können: `sections`-Direktive
+    - Code-Abschnitte, die nur von einem Thread bearbeitet werden dürfen.
+      Hierdurch wird erreicht, dass eine bestimmte Anweisung
+      sequenziell ausgeführt wird, ohne den parallelen Abschnitt verlassen zu
+      müssen: `single`-Direktive
+      
+
+**Tasks:** Parallelisierung von Operationen auf komplexe Datenstrukturen, wie
+Listen oder Bäume.
 
 
 # 1.3 Laplace DGS
+
+Bezüglich der numerischen Lösung des *Laplace'schen
+Differentialgleichungssystems* wurde mit einer Implementierung von John Burkardt
+experimentiert[^DGS].
+
+[^DGS]: https://people.sc.fsu.edu/~jburkardt/c_src/heated_plate_openmp/heated_plate_openmp.c
+
+Der Source-Code nähert sich der Lösung der iterativen Temperaturausbreitung in
+einem zweidimensionalen Raum durch wiederholte Ausführung folgendes Codes:
+
+```C
+    W[Central] = (1/4) * ( W[North] + W[South] + W[East] + W[West] )
+```
+
+*W* ist ein Array, das die Temperaturen im Rechteck erfasst. *Central* ist der
+aktuell betrachtete Punkt im Raum. *North*, *South*, *East* und *West* sind die
+Punkte um den betrachteten Punkt herum. Durch die Multiplikation mit 1/4 wird
+der Durchschnitt dieser benachbarten Punkte gebildet.
+
+Durch ausreichend häufige Ausführung dieses Vorgehens geht die Differenz der
+sukzessiven Schätzungen des Problems gegen Null. Hierzu kann eine Toleranzgrenze
+gesetzt werden.
+
+Der Source-Code erzeugt folgende Ausgabe:
+
+```bash
+    
+C/OpenMP version
+  A program to solve for the steady state temperature distribution
+  over a rectangular plate.
+
+  Spatial grid of 500 by 500 points.
+  The iteration will be repeated until the change is <= 1.000000e-03
+  Number of processors available = 4
+  Number of threads =              4
+
+  MEAN = 74.949900
+
+ Iteration  Change
+
+         1  18.737475
+         2  9.368737
+         4  4.098823
+         8  2.289577
+        16  1.136604
+        32  0.568201
+        64  0.282805
+       128  0.141777
+       256  0.070808
+       512  0.035427
+      1024  0.017707
+      2048  0.008856
+      4096  0.004428
+      8192  0.002210
+     16384  0.001043
+
+     16955  0.001000
+
+  Error tolerance achieved.
+  Wallclock time = 82.692189
+
+HEATED_PLATE_OPENMP:
+  Normal end of execution
+```
 
 
 
