@@ -43,7 +43,6 @@ OpenMP definiert sich durch folgende Haupteigenschaften:
 * **Direktiven** weisen Compiler an, Abarbeitung einer Schleife auf Threads bzw.
   Prozessoren zu verteilen.
 * **Fork/Join Modell:** 
-
     OpenMP Programme starten mit einem Thread (Master-Thread),
     Team aus parallelen Threads (Worker-Threads) wird erstellt, Anweisungen im
     Parallel-Block werden von allen Threads bearbeitet, am Ende synchronisieren
@@ -51,11 +50,12 @@ OpenMP definiert sich durch folgende Haupteigenschaften:
 * **Laufzeit-Funktionen (Runtime subroutines/functions):** Werden hauptsächlich
   verwendet, um Parameter der Laufzeitumgebung von OpenMP abzufragen oder zu
   setzen.
-    Bsp: `omp_set_num_threads(n)`, legt die Anzahl der OpenMP Threads fest
+    Bsp: `omp_set_num_threads(n)`, legt die Anzahl der Threads fest.
 * **Umgebungsvariablen (Environment variables): **Setzen der Parameter der
   Laufzeitumgebung zu Beginn der Programmausführung.
     Bsp: `OMP_NUM_THREADS=2`
-    
+
+\newpage
 
 Erste Tests wurden mit folgendem Code (basierend auf omp_hello.c von Blaise
 Barney [^hello]) ausgeführt:
@@ -68,7 +68,7 @@ Barney [^hello]) ausgeführt:
     int main (int argc, char *argv[]) 
     {
     int nthreads, tid;
-    /* Anzahl der Threads explizit auf 3 gesetzt.
+    /* Anzahl der Threads explizit auf 3 gesetzt.*/
     omp_set_dynamic(0)
     omp_set_num_threads(3);
 
@@ -176,6 +176,7 @@ Für *clause* kann eine der folgenden Optionen gewählt werden:
     `if(expr)`
 
 
+Beispiel:
 
 ```C
     #pragma omp parallel
@@ -302,11 +303,11 @@ entwickelte API [^posix].
 Unter Linux gibt es zwei Implementierungen von pthreads, die von der GNU C
 Bibliothek unterstützt werden:
 
-    - LinuxThreads: Die originale pthreads-Implementierung. Wird seit glibc
-      Version 2.4 nicht mehr unterstützt.
-    - NPTL (Native POSIX Threads Library): Im Vergleich zu LinuxThreads erfüllt
-      es eher die Anforderungen von POSIX.1. Außerdem bietet es eine verbesserte
-      Performance bei einer großen Anzahl an Threads.
+ - **LinuxThreads:** Die originale pthreads-Implementierung. Wird seit glibc
+   Version 2.4 nicht mehr unterstützt.
+ - **NPTL (Native POSIX Threads Library):** Im Vergleich zu LinuxThreads erfüllt
+   es eher die Anforderungen von POSIX.1. Außerdem bietet es eine verbesserte
+   Performance bei einer großen Anzahl an Threads.
 
 Auf dem verfügbaren Testsystem läuft NPTL in der Version 2.22.
 
@@ -386,10 +387,6 @@ Die Funktion `void *dotprod(void *arg)` berechnet das Skalarprodukt. Darin entha
 Die parallele Version dieser Funktion hat zusätzlich folgenden Code, um zu vermeiden, dass Threads gleichzeitig auf die `struct DOTDATA` zugreifen:
 
 ```C
-   /*
-   Lock a mutex prior to updating the value in the shared structure, and 
-   unlock it upon updating.
-   */
    pthread_mutex_lock (&mutexsum);
    printf("Thread %ld adding partial sum of %f to global sum of %f\n",
           arg, mysum, dotstr.sum);
@@ -445,19 +442,21 @@ dabei verbrauchte Zeit an.
 
 **Der grobe Ablauf einer `Hotspot-Analyse`:**
 
-    - Projekt Anlegen, Projektname vergeben
-    - Zu testende Software festlegen
-    - Zu verwendente Parameter angeben (im Beispiel `balls.dat`, Bild das
-      gerendert werden soll)
-    - Analyse-Typ auswählen (im Beispiel *Basic Hotspots*)
-    - Analyse starten
+ - Projekt Anlegen, Projektname vergeben
+ - Zu testende Software festlegen
+ - Zu verwendente Parameter angeben (im Beispiel `balls.dat`, Bild das
+   gerendert werden soll)
+ - Analyse-Typ auswählen (im Beispiel *Basic Hotspots*)
+ - Analyse starten
+
+\newpage
 
 **VTune liefert folgende Ergebnisse (siehe Abbildung 1):**
 
  - **Elapsed Time**: Insgesamt hat die Ausführung des Programms 27,826 Sekunden
    gedauert, davon reine CPU-Rechenzeit 17,780 Sekunden.
  - **Top Hotspots:** Hier sind die Funktionen aufgelistet, die am meisten Rechenzeit
-   in Anspruch genommen haben
+   in Anspruch genommen haben.
  - **CPU Usage Histogram:** Zeigt an, wie sich der tatsächlichen CPU-Verbrauch zur
    *wall time* verhält.
 
