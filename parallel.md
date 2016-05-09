@@ -353,11 +353,11 @@ Professional, S. 47, 1997.
 
 # 2.2 Serielle vs. parallele/synchronisierte Version
 
-Da bereits in Kapitel 1 - OpenMP die numerische Lösung des Laplace'schen
+Da bereits in Kapitel 1 (OpenMP) die numerische Lösung des Laplace'schen
 Differentialgleichungssystems betrachtet wurde, soll für pthread ein anderes
-Beispiel herangezogen werden. Basierend auf dem Code von Blaise Barney[^dot]
-zur Berechnung eines Skalarprodukts soll das Laufzeitverhalten der seriellen 
-Version[^dot2] mit dem der parallelen/synchronisierten Version verglichen werden.
+Beispiel herangezogen werden. Basierend auf dem Code von Blaise Barney zur Berechnung eines Skalarprodukts soll das Laufzeitverhalten der seriellen 
+Version[^dot2] mit dem der parallelen/synchronisierten[^dot]
+ Version verglichen werden.
 
 Im Code-Beispiel liegt die folgende Datenstruktur vor, auf die alle Threads
 gemeinsam zugreifen:
@@ -372,9 +372,40 @@ gemeinsam zugreifen:
     } DOTDATA;
 ```
 
-Letztendlich geht es in diesem Beispiel eher darum, das Mutex-Konstrukt zu
-verstehen. Die Laufzeitunterschiede zwischen paralleler und synchroner Version
-sind eher gering.
+
+Die Funktion `void *dotprod(void *arg)` berechnet das Skalarprodukt. Darin enthalten ist die folgende for-Schleife:
+
+```C
+	mysum = 0;
+	for (i=start; i<end ; i++) 
+    {
+      mysum += (x[i] * y[i]);
+    }
+```
+
+Die parallele Version dieser Funktion hat zusätzlich folgenden Code, um zu vermeiden, dass Threads gleichzeitig auf die `struct DOTDATA` zugreifen:
+
+```C
+   /*
+   Lock a mutex prior to updating the value in the shared structure, and 
+   unlock it upon updating.
+   */
+   pthread_mutex_lock (&mutexsum);
+   printf("Thread %ld adding partial sum of %f to global sum of %f\n",
+          arg, mysum, dotstr.sum);
+   dotstr.sum += mysum;
+   pthread_mutex_unlock (&mutexsum);
+
+   pthread_exit((void*) 0);
+```
+
+In der parallelen Version *joinen* die Threads nach Berechnung des Skalarprodukts in den Hauptthread.
+
+Die Laufzeitunterschiede zwischen paralleler und synchroner Version
+sind in diesem Beispiel eher gering bzw. weniger von Bedeutung. Es ist vielmehr
+ein gutes Beispiel, um die Eigenschaften von pthread (Erstellen eines Threads,
+Mutex, joinen, etc.) testen zu können.
+
 
 
 
@@ -383,4 +414,65 @@ sind eher gering.
 
 
 
-# 3. Intel's Vtune Amplifier
+# 3. Intel's VTune Amplifier
+
+Intel's VTune Amplifier ist eine kommerzielle Anwendung für die Performanceanalyse
+von Software. Zwei der zahlreichen Funktionalitäten sind beispielsweise das
+Erkennen von problematischen Funktionen im Source-Code und die Betrachtung, wie
+effizent die Hardware von der Software ausgenutzt wird.
+
+Zu Testzwecken wurde die 30-Tage-Testversion eingesetzt: Intel VTune Amplifier
+XE 2016 Update3[^download].
+
+**Installation unter Linux:**
+
+ - Entpacken: `tar -xzf vtune_amplifier_xe_2016_update3.tar.gz`
+ - Installation über GUI: `./install_GUI.sh`
+ - VTune-Amplifier-Umgebung erstellen: `source <install-dir>/amplxe-vars.sh`
+
+**Starten:**
+
+ - VTune-Amplifier-GUI: `amplxe-gui`
+ - VTune-Amplifier-CL: `amplxe-cl`
+
+
+Getestet wurden anschließend verschiedene Funktionalitäten, die Intel's VTune
+Amplifier anbietet. An dieser Stelle soll beispielhaft der Ablauf einer
+*Hotspot-Analyse* gezeigt werden. VTune liefert mit der Installation Test-Code,
+der zur Analyse verwendet werden kann. Die *Hotspot-Analyse* wird für die
+Software `tachyon` ausgeführt. Diese Software rendert ein Bild und zeigt die
+dabei verbrauchte Zeit an.
+
+**Der grobe Ablauf einer `Hotspot-Analyse`:**
+
+    - Projekt Anlegen, Projektname vergeben
+    - Zu testende Software festlegen
+    - Zu verwendente Parameter angeben (im Beispiel `balls.dat`, Bild das
+      gerendert werden soll)
+    - Analyse-Typ auswählen (im Beispiel *Basic Hotspots*)
+    - Analyse starten
+
+**VTune liefert folgende Ergebnisse (siehe Abbildung 1):**
+
+ - **Elapsed Time**: Insgesamt hat die Ausführung des Programms 27,826 Sekunden
+   gedauert, davon reine CPU-Rechenzeit 17,780 Sekunden.
+ - **Top Hotspots:** Hier sind die Funktionen aufgelistet, die am meisten Rechenzeit
+   in Anspruch genommen haben
+ - **CPU Usage Histogram:** Zeigt an, wie sich der tatsächlichen CPU-Verbrauch zur
+   *wall time* verhält.
+
+Zusätzlich liefert VTune noch Informationen zur Testplattform. In weiteren
+Reitern können die als *Hotspot* erkannten Funktionen näher analysiert werden.
+
+**Weiteres Vorgehen:** Der Source-Code muss nun analysiert werden. Dazu bietet
+VTune eine visuelle Hilfe an und markiert kritische Code-Stellen. Mit
+Doppelklick auf den jeweiligen Source-Code öffnet sich der voreingestellte
+Texteditor und der Code kann bearbeitet werden. Sind die gewünschten Änderungen
+eingepflegt, führt man erneut die *Hotspot-Analyse* durch. Dieses Vorgehen wird
+solange durchgeführt, bis die gewünschte Performance erreicht ist.
+
+
+![Ergebnis der Hotspot-Analyse](/home/sue/STUDIUM/Softwaresysteme/vtune.png)
+
+
+[^download]: https//software.intel.com/en-us/intel-vtune-amplifier-xe/try-buy
