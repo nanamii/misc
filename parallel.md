@@ -30,7 +30,7 @@ OpenMP steht für *Open Specification for Multi Processing* und ist eine
 Programmierschnittstelle für Shared-Memory-Programmierung auf
 Multiprozessor-Rechnern. Wahlweise erfolgt die Programmierung in C, C++ oder
 Fortran. Die erste Spezifikation von OpenMP ist 1997 entwickelt worden und
-wurde vortan erweitert.
+wurde fortan erweitert.
 
 
 # 1.1 Haupteigenschaften und erste Tests
